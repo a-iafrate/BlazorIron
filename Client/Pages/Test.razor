@@ -1,0 +1,25 @@
+﻿@page "/test"
+@inject HttpClient Http
+@using BlazorIron.Shared
+
+<PageTitle>Test</PageTitle>
+
+<h1>Counter</h1>
+
+<p>Motore 1: <input @bind="servoInfo.Angle1"/> </p>
+<p>Motore 2: <input @bind="servoInfo.Angle2"/> </p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private ServoInfo servoInfo = new ServoInfo() { Angle1=10,Angle2=20};
+
+    private async void IncrementCount()
+    {
+        using var response = await Http.PostAsJsonAsync("IronMan/MoveServo",servoInfo);
+
+        // convert response data to Article object
+    //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
+}

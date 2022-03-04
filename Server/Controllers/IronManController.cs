@@ -8,7 +8,7 @@ namespace BlazorIron.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class IronManController : ControllerBase
     {
         
         private const int ANGLE_OPEN_MOTOR1 = 160;
@@ -21,9 +21,9 @@ namespace BlazorIron.Server.Controllers
         private static int MOTOR_SPEED = 5;
 
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<IronManController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public IronManController(ILogger<IronManController> logger)
         {
             _logger = logger;
         }
@@ -54,13 +54,36 @@ namespace BlazorIron.Server.Controllers
             servoMotor2.Start();  // Enable control signal.
             
 
-            Open(servoMotor, servoMotor2);
+            OpenFace(servoMotor, servoMotor2);
             Thread.Sleep(5000);
-            Close(servoMotor, servoMotor2);
+            CloseFace(servoMotor, servoMotor2);
 
         }
 
-        public static void Close(ServoMotor servoMotor, ServoMotor servoMotor2)
+        [HttpPost("[action]")]
+        public void MoveServo(ServoInfo input)
+        {
+
+            ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
+                180,
+                1000,
+                2000);
+            ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
+                1000,
+                2000);
+
+            servoMotor.Start();  // Enable control signal.
+
+            servoMotor2.Start();  // Enable control signal.
+
+
+            MoveTo(servoMotor,input.Angle1,servoMotor2,input.Angle2);
+
+
+
+        }
+
+        private void CloseFace(ServoMotor servoMotor, ServoMotor servoMotor2)
         {
 
 
@@ -72,7 +95,7 @@ namespace BlazorIron.Server.Controllers
             CurrentAngleMotor2 = ANGLE_CLOSE_MOTOR2;
         }
 
-        public static void Open(ServoMotor servoMotor, ServoMotor servoMotor2)
+        private void OpenFace(ServoMotor servoMotor, ServoMotor servoMotor2)
         {
 
             MoveTo(servoMotor2, ANGLE_OPEN_MOTOR2, CurrentAngleMotor2, servoMotor, ANGLE_OPEN_MOTOR1, CurrentAngleMotor1);
@@ -81,7 +104,16 @@ namespace BlazorIron.Server.Controllers
             CurrentAngleMotor2 = ANGLE_OPEN_MOTOR2;
         }
 
-        public static void MoveTo(ServoMotor s, int angle, int currentAngle, ServoMotor s1, int angle1, int currentAngle1)
+        private void MoveTo(ServoMotor servoMotor,int angle, ServoMotor servoMotor2, int angle2)
+        {
+
+            MoveTo(servoMotor2, angle2, CurrentAngleMotor2, servoMotor, angle, CurrentAngleMotor1);
+
+            CurrentAngleMotor1 = angle;
+            CurrentAngleMotor2 = angle2;
+        }
+
+        private void MoveTo(ServoMotor s, int angle, int currentAngle, ServoMotor s1, int angle1, int currentAngle1)
         {
             int pos = currentAngle;
             int pos1 = currentAngle;
