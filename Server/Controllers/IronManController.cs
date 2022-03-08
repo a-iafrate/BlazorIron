@@ -2,7 +2,10 @@ using BlazorIron.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Iot.Device.ServoMotor;
 using System.Device.Pwm;
-
+using System.Device.Spi;
+using Iot.Device.Ws28xx;
+using Iot.Device.Graphics;
+using System.Drawing;
 
 namespace BlazorIron.Server.Controllers
 {
@@ -57,6 +60,51 @@ namespace BlazorIron.Server.Controllers
             OpenFace(servoMotor, servoMotor2);
             Thread.Sleep(5000);
             CloseFace(servoMotor, servoMotor2);
+
+        }
+
+        [HttpGet("[action]")]
+        public void LedOn()
+        {
+
+            var count = 5; // number of LEDs
+            var settings = new SpiConnectionSettings(0, 0)
+            {
+                ClockFrequency = 2_400_000,
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
+            };
+
+            using SpiDevice spi = SpiDevice.Create(settings);
+
+            var device = new Ws2812b(spi, count);
+
+            BitmapImage image = device.Image;
+            image.Clear();
+            image.SetPixel(0, 0, Color.Orange);
+            device.Update();
+
+        }
+
+        [HttpGet("[action]")]
+        public void LedOff()
+        {
+
+            var count = 5; // number of LEDs
+            var settings = new SpiConnectionSettings(0, 0)
+            {
+                ClockFrequency = 2_400_000,
+                Mode = SpiMode.Mode0,
+                DataBitLength = 8
+            };
+
+            using SpiDevice spi = SpiDevice.Create(settings);
+
+            var device = new Ws2812b(spi, count);
+
+            BitmapImage image = device.Image;
+            image.Clear();
+            
 
         }
 
