@@ -13,7 +13,7 @@ namespace BlazorIron.Server.Controllers
     [Route("[controller]")]
     public class IronManController : ControllerBase
     {
-        
+
         private const int ANGLE_OPEN_MOTOR1 = 160;
         private const int ANGLE_OPEN_MOTOR2 = 20;
         private const int ANGLE_CLOSE_MOTOR1 = 20;
@@ -39,10 +39,10 @@ namespace BlazorIron.Server.Controllers
         [HttpGet("[action]")]
         public void Test()
         {
-           
 
 
-           
+
+
 
             ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
@@ -55,7 +55,7 @@ namespace BlazorIron.Server.Controllers
             servoMotor.Start();  // Enable control signal.
 
             servoMotor2.Start();  // Enable control signal.
-            
+
 
             OpenFace(servoMotor, servoMotor2);
             Thread.Sleep(5000);
@@ -67,7 +67,7 @@ namespace BlazorIron.Server.Controllers
         public void LedOn()
         {
 
-            var count = 5; // number of LEDs
+            var count = 14; // number of LEDs
             var settings = new SpiConnectionSettings(0, 0)
             {
                 ClockFrequency = 2_400_000,
@@ -82,6 +82,9 @@ namespace BlazorIron.Server.Controllers
             BitmapImage image = device.Image;
             image.Clear();
             image.SetPixel(0, 0, Color.Orange);
+
+            image.SetPixel(1, 0, Color.White);
+            image.SetPixel(2, 0, Color.Blue);
             device.Update();
 
         }
@@ -90,7 +93,7 @@ namespace BlazorIron.Server.Controllers
         public void LedOff()
         {
 
-            var count = 5; // number of LEDs
+            var count = 14; // number of LEDs
             var settings = new SpiConnectionSettings(0, 0)
             {
                 ClockFrequency = 2_400_000,
@@ -104,7 +107,7 @@ namespace BlazorIron.Server.Controllers
 
             BitmapImage image = device.Image;
             image.Clear();
-            
+            device.Update();
 
         }
 
@@ -114,21 +117,22 @@ namespace BlazorIron.Server.Controllers
 
             ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
-                1000,
-                2000);
+                input.MinPulse,
+                input.MaxPulse);
             ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                1000,
-                2000);
+                input.MinPulse,
+                input.MaxPulse);
 
             servoMotor.Start();  // Enable control signal.
 
             servoMotor2.Start();  // Enable control signal.
 
 
-            MoveTo(servoMotor,input.Angle1,servoMotor2,input.Angle2);
+            MoveTo(servoMotor, input.Angle1, servoMotor2, input.Angle2);
 
 
-
+            servoMotor.Stop();
+            servoMotor2.Stop();
         }
 
         private void CloseFace(ServoMotor servoMotor, ServoMotor servoMotor2)
@@ -152,7 +156,7 @@ namespace BlazorIron.Server.Controllers
             CurrentAngleMotor2 = ANGLE_OPEN_MOTOR2;
         }
 
-        private void MoveTo(ServoMotor servoMotor,int angle, ServoMotor servoMotor2, int angle2)
+        private void MoveTo(ServoMotor servoMotor, int angle, ServoMotor servoMotor2, int angle2)
         {
 
             MoveTo(servoMotor2, angle2, CurrentAngleMotor2, servoMotor, angle, CurrentAngleMotor1);

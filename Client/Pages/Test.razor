@@ -6,39 +6,42 @@
 
 <h1>Counter</h1>
 
-<p>Motore 1: <input @bind="servoInfo.Angle1"/> </p>
-<p>Motore 2: <input @bind="servoInfo.Angle2"/> </p>
+<p>Motore 1: <input @bind="servoInfo.Angle1" /> </p>
+<p>Motore 2: <input @bind="servoInfo.Angle2" /> </p>
+<p>Min pulse: <input @bind="servoInfo.MinPulse" /> </p>
+<p>Max pulse: <input @bind="servoInfo.MaxPulse" /> </p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button><br />
-<button class="btn btn-primary" @onclick="LedOn">Led on</button><button class="btn btn-primary" @onclick="LedOff">Led off</button><br />
+<button class="btn btn-primary" @onclick="LedOn">Led on</button><button class="btn btn-primary" @onclick="LedOff">Led
+    off</button><br />
 
 
 @code {
-    private ServoInfo servoInfo = new ServoInfo() { Angle1=10,Angle2=20};
+    private ServoInfo servoInfo = new ServoInfo() { Angle1 = 20 , Angle2 = 160 };
 
     private async void IncrementCount()
     {
-        using var response = await Http.PostAsJsonAsync("IronMan/MoveServo",servoInfo);
+        using var response = await Http.PostAsJsonAsync("IronMan/MoveServo", servoInfo);
 
-       
-    //article = await response.Content.ReadFromJsonAsync<Article>();
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
 
     }
 
     private async void LedOn()
     {
-       
-         Http.GetAsync("IronMan/LedOn");
-       
-    //article = await response.Content.ReadFromJsonAsync<Article>();
+
+        Http.GetAsync("IronMan/LedOn");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
 
     }
 
     private async void LedOff()
-    {  
-         Http.GetAsync("IronMan/LedOff");
-       
-    //article = await response.Content.ReadFromJsonAsync<Article>();
+    {
+        Http.GetAsync("IronMan/LedOff");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
 
     }
 }
