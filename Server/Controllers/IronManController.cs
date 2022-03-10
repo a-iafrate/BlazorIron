@@ -14,10 +14,10 @@ namespace BlazorIron.Server.Controllers
     public class IronManController : ControllerBase
     {
 
-        private const int ANGLE_OPEN_MOTOR1 = 160;
-        private const int ANGLE_OPEN_MOTOR2 = 20;
-        private const int ANGLE_CLOSE_MOTOR1 = 20;
-        private const int ANGLE_CLOSE_MOTOR2 = 160;
+        private const int ANGLE_OPEN_MOTOR1 = 140;
+        private const int ANGLE_OPEN_MOTOR2 = 40;
+        private const int ANGLE_CLOSE_MOTOR1 = 0;
+        private const int ANGLE_CLOSE_MOTOR2 = 180;
 
         private static int CurrentAngleMotor1 = 20;
         private static int CurrentAngleMotor2 = 160;
