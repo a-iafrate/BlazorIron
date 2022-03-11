@@ -3,19 +3,44 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world Ironman v 0.0.5</h1>
+<h1>Hello, world Ironman v 0.0.7</h1>
 
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+<p>
+<button class="btn btn-primary" @onclick="OpenFace">Open face</button>
+<button class="btn btn-primary" @onclick="CloseFace">Close face</button></p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Test</button>
+<p>
+<button class="btn btn-primary" @onclick="LedOn">Led on</button>
+<button class="btn btn-primary" @onclick="LedOff">Led off</button></p>
 
 @code {
 
 
-    private void IncrementCount()
+    private void OpenFace() {
+        Http.GetAsync("IronMan/openface"); } 
+
+    private void CloseFace()
     {
-        Http.GetAsync("IronMan/test");
+        Http.GetAsync("IronMan/closeface");
     }
+    private async void LedOn()
+    {
+    
+        Http.GetAsync("IronMan/LedOn");
+    
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
+    
+    
+        private async void LedOff()
+     {   
+            Http.GetAsync("IronMan/LedOff");
+    
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+    
+        }
 }

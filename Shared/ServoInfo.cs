@@ -10,7 +10,7 @@ namespace BlazorIron.Shared
     {
         public int Angle1 { get; set; }
         public int Angle2 { get; set; }
-        public int MinPulse { get; set; } = 400;
-        public int MaxPulse { get; set; } = 2400;
+        public int MinPulse { get; set; } = 500;
+        public int MaxPulse { get; set; } = 2500;
     }
 }

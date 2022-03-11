@@ -6,6 +6,7 @@ using System.Device.Spi;
 using Iot.Device.Ws28xx;
 using Iot.Device.Graphics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace BlazorIron.Server.Controllers
 {
@@ -19,9 +20,19 @@ namespace BlazorIron.Server.Controllers
         private const int ANGLE_CLOSE_MOTOR1 = 0;
         private const int ANGLE_CLOSE_MOTOR2 = 180;
 
-        private static int CurrentAngleMotor1 = 20;
-        private static int CurrentAngleMotor2 = 160;
-        private static int MOTOR_SPEED = 5;
+        private static int CurrentAngleMotor1 = ANGLE_OPEN_MOTOR1;
+        private static int CurrentAngleMotor2 = ANGLE_OPEN_MOTOR2;
+        private static int MOTOR_SPEED = 2;
+
+        private static int MINIMUM_PULSE = 500;
+        private static int MAXIMUM_PULSE = 2500;
+
+
+        [DllImport("libc.so.6", SetLastError = true)]
+        public static extern Int32 reboot(Int32 cmd, IntPtr arg);
+
+        public const Int32 LINUX_REBOOT_CMD_RESTART = 0x01234567;
+        public const Int32 LINUX_REBOOT_CMD_POWER_OFF = 0x4321FEDC;
 
 
         private readonly ILogger<IronManController> _logger;
@@ -37,19 +48,31 @@ namespace BlazorIron.Server.Controllers
         }
 
         [HttpGet("[action]")]
-        public void Test()
+        public void Reboot()
         {
 
+            reboot(LINUX_REBOOT_CMD_RESTART, IntPtr.Zero);
 
+        }
 
+        [HttpGet("[action]")]
+        public void PowerOff()
+        {
 
+            reboot(LINUX_REBOOT_CMD_POWER_OFF, IntPtr.Zero);
+
+        }
+
+        [HttpGet("[action]")]
+        public void OpenFace()
+        {
 
             ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
-                1000,
-                2000);
+                MINIMUM_PULSE,
+                MAXIMUM_PULSE);
             ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                1000,
+                MINIMUM_PULSE,
                 2000);
 
             servoMotor.Start();  // Enable control signal.
@@ -58,7 +81,26 @@ namespace BlazorIron.Server.Controllers
 
 
             OpenFace(servoMotor, servoMotor2);
-            Thread.Sleep(5000);
+
+
+        }
+
+        [HttpGet("[action]")]
+        public void CloseFace()
+        {
+
+            ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
+                180,
+                MINIMUM_PULSE,
+                MAXIMUM_PULSE);
+            ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
+                MINIMUM_PULSE,
+                2000);
+
+            servoMotor.Start();  // Enable control signal.
+
+            servoMotor2.Start();  // Enable control signal.
+
             CloseFace(servoMotor, servoMotor2);
 
         }
@@ -141,19 +183,13 @@ namespace BlazorIron.Server.Controllers
 
             MoveTo(servoMotor, ANGLE_CLOSE_MOTOR1, CurrentAngleMotor1, servoMotor2, ANGLE_CLOSE_MOTOR2, CurrentAngleMotor2);
 
-
-
-            CurrentAngleMotor1 = ANGLE_CLOSE_MOTOR1;
-            CurrentAngleMotor2 = ANGLE_CLOSE_MOTOR2;
         }
 
         private void OpenFace(ServoMotor servoMotor, ServoMotor servoMotor2)
         {
 
-            MoveTo(servoMotor2, ANGLE_OPEN_MOTOR2, CurrentAngleMotor2, servoMotor, ANGLE_OPEN_MOTOR1, CurrentAngleMotor1);
+            MoveTo(servoMotor, ANGLE_OPEN_MOTOR1, CurrentAngleMotor1, servoMotor2, ANGLE_OPEN_MOTOR2, CurrentAngleMotor2);
 
-            CurrentAngleMotor1 = ANGLE_OPEN_MOTOR1;
-            CurrentAngleMotor2 = ANGLE_OPEN_MOTOR2;
         }
 
         private void MoveTo(ServoMotor servoMotor, int angle, ServoMotor servoMotor2, int angle2)

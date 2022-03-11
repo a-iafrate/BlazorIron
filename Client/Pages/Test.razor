@@ -11,10 +11,10 @@
 <p>Min pulse: <input @bind="servoInfo.MinPulse" /> </p>
 <p>Max pulse: <input @bind="servoInfo.MaxPulse" /> </p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button><br />
-<button class="btn btn-primary" @onclick="LedOn">Led on</button><button class="btn btn-primary" @onclick="LedOff">Led
-    off</button><br />
-
+<p><button class="btn btn-primary" @onclick="IncrementCount">Click me</button></p>
+<p><button class="btn btn-primary" @onclick="LedOn">Led on</button><button class="btn btn-primary" @onclick="LedOff">Led
+    off</button></p>
+<p><button class="btn btn-primary" @onclick="PowerOff">Power off</button><button class="btn btn-primary" @onclick="Reboot">Reboot</button></p>
 
 @code {
     private ServoInfo servoInfo = new ServoInfo() { Angle1 = 20 , Angle2 = 160 };
@@ -40,6 +40,23 @@
     private async void LedOff()
     {
         Http.GetAsync("IronMan/LedOff");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
+
+    private async void PowerOff()
+    {
+
+        Http.GetAsync("IronMan/PowerOff");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
+
+    private async void Reboot()
+    {
+        Http.GetAsync("IronMan/Reboot");
 
         //article = await response.Content.ReadFromJsonAsync<Article>();
 
