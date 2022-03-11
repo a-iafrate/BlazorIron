@@ -235,6 +235,9 @@ namespace BlazorIron.Server.Controllers
                 Console.WriteLine("Current1: " + currentAngle1 + " - Angle1: " + angle1);
 
             }
+
+            CurrentAngleMotor1 = angle;
+            CurrentAngleMotor2 = angle1;
         }
     }
 }
