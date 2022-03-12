@@ -7,6 +7,7 @@ using Iot.Device.Ws28xx;
 using Iot.Device.Graphics;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Device.Gpio;
 
 namespace BlazorIron.Server.Controllers
 {
@@ -34,6 +35,8 @@ namespace BlazorIron.Server.Controllers
         public const Int32 LINUX_REBOOT_CMD_RESTART = 0x01234567;
         public const Int32 LINUX_REBOOT_CMD_POWER_OFF = 0x4321FEDC;
 
+        public const int EyeSwitchLed = 17;
+
 
         private readonly ILogger<IronManController> _logger;
 
@@ -52,6 +55,32 @@ namespace BlazorIron.Server.Controllers
         {
 
             reboot(LINUX_REBOOT_CMD_RESTART, IntPtr.Zero);
+
+        }
+
+
+
+        [HttpGet("[action]")]
+        public void EyesOn()
+        {
+
+
+            GpioController controller = new GpioController();
+            // Sets the pin to output mode so we can switch something on
+            controller.OpenPin(EyeSwitchLed, PinMode.Output);
+            controller.Write(EyeSwitchLed, PinValue.High);
+
+        }
+
+        [HttpGet("[action]")]
+        public void EyesOff()
+        {
+
+
+            GpioController controller = new GpioController();
+            // Sets the pin to output mode so we can switch something on
+            controller.OpenPin(EyeSwitchLed, PinMode.Output);
+            controller.Write(EyeSwitchLed, PinValue.Low);
 
         }
 

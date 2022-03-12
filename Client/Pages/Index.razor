@@ -3,24 +3,33 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world Ironman v 0.0.7</h1>
+<h1>Hello, world Ironman v 0.1</h1>
 
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 <p>
-<button class="btn btn-primary" @onclick="OpenFace">Open face</button>
-<button class="btn btn-primary" @onclick="CloseFace">Close face</button></p>
+    <button class="btn btn-primary" @onclick="OpenFace">Open face</button>&nbsp;&nbsp;
+    <button class="btn btn-primary" @onclick="CloseFace">Close face</button>
+</p>
 
 <p>
-<button class="btn btn-primary" @onclick="LedOn">Led on</button>
-<button class="btn btn-primary" @onclick="LedOff">Led off</button></p>
+    <button class="btn btn-primary" @onclick="LedOn">Led on</button>&nbsp;&nbsp;
+    <button class="btn btn-primary" @onclick="LedOff">Led off</button>
+</p>
+
+<p>
+    <button class="btn btn-primary" @onclick="EyesOn">Eyes on</button>&nbsp;&nbsp;
+    <button class="btn btn-primary" @onclick="EyesOff">Eyes off</button>
+</p>
 
 @code {
 
 
-    private void OpenFace() {
-        Http.GetAsync("IronMan/openface"); } 
+    private void OpenFace()
+    {
+        Http.GetAsync("IronMan/openface");
+    }
 
     private void CloseFace()
     {
@@ -28,19 +37,35 @@ Welcome to your new app.
     }
     private async void LedOn()
     {
-    
+
         Http.GetAsync("IronMan/LedOn");
-    
+
         //article = await response.Content.ReadFromJsonAsync<Article>();
 
     }
-    
-    
-        private async void LedOff()
-     {   
-            Http.GetAsync("IronMan/LedOff");
-    
+
+
+    private async void LedOff()
+    {
+        Http.GetAsync("IronMan/LedOff");
+
         //article = await response.Content.ReadFromJsonAsync<Article>();
-    
-        }
+
+    }
+
+    private async void EyesOff()
+    {
+        Http.GetAsync("IronMan/EyesOff");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
+
+    private async void EyesOn()
+    {
+        Http.GetAsync("IronMan/EyesOn");
+
+        //article = await response.Content.ReadFromJsonAsync<Article>();
+
+    }
 }
