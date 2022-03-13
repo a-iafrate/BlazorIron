@@ -16,17 +16,13 @@ namespace BlazorIron.Server.Controllers
     public class IronManController : ControllerBase
     {
 
-        private const int ANGLE_OPEN_MOTOR1 = 140;
-        private const int ANGLE_OPEN_MOTOR2 = 40;
-        private const int ANGLE_CLOSE_MOTOR1 = 0;
-        private const int ANGLE_CLOSE_MOTOR2 = 180;
 
-        private static int CurrentAngleMotor1 = ANGLE_OPEN_MOTOR1;
-        private static int CurrentAngleMotor2 = ANGLE_OPEN_MOTOR2;
-        private static int MOTOR_SPEED = 2;
 
-        private static int MINIMUM_PULSE = 500;
-        private static int MAXIMUM_PULSE = 2500;
+        private int CurrentAngleMotor1 = 0;
+        private int CurrentAngleMotor2 = 0;
+
+
+
 
 
         [DllImport("libc.so.6", SetLastError = true)]
@@ -35,14 +31,22 @@ namespace BlazorIron.Server.Controllers
         public const Int32 LINUX_REBOOT_CMD_RESTART = 0x01234567;
         public const Int32 LINUX_REBOOT_CMD_POWER_OFF = 0x4321FEDC;
 
-        public const int EyeSwitchLed = 17;
 
+
+        public IronSettings ironSettings = new IronSettings();
 
         private readonly ILogger<IronManController> _logger;
+        private readonly IConfiguration Configuration;
 
-        public IronManController(ILogger<IronManController> logger)
+        public IronManController(ILogger<IronManController> logger, IConfiguration configuration)
         {
             _logger = logger;
+
+            Configuration = configuration;
+            Configuration.GetSection(IronSettings.Position).Bind(ironSettings);
+
+            CurrentAngleMotor1 = ironSettings.AngleCloseMotor1;
+            CurrentAngleMotor2 = ironSettings.AngleOpenMotor2;
         }
 
         [HttpGet]
@@ -67,8 +71,8 @@ namespace BlazorIron.Server.Controllers
 
             GpioController controller = new GpioController();
             // Sets the pin to output mode so we can switch something on
-            controller.OpenPin(EyeSwitchLed, PinMode.Output);
-            controller.Write(EyeSwitchLed, PinValue.High);
+            controller.OpenPin(ironSettings.EyeSwitchLed, PinMode.Output);
+            controller.Write(ironSettings.EyeSwitchLed, PinValue.High);
 
         }
 
@@ -79,8 +83,8 @@ namespace BlazorIron.Server.Controllers
 
             GpioController controller = new GpioController();
             // Sets the pin to output mode so we can switch something on
-            controller.OpenPin(EyeSwitchLed, PinMode.Output);
-            controller.Write(EyeSwitchLed, PinValue.Low);
+            controller.OpenPin(ironSettings.EyeSwitchLed, PinMode.Output);
+            controller.Write(ironSettings.EyeSwitchLed, PinValue.Low);
 
         }
 
@@ -98,11 +102,11 @@ namespace BlazorIron.Server.Controllers
 
             ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
-                MINIMUM_PULSE,
-                MAXIMUM_PULSE);
+                ironSettings.MinimumPulse,
+                ironSettings.MaximumPulse);
             ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                MINIMUM_PULSE,
-                2000);
+                ironSettings.MinimumPulse,
+                ironSettings.MaximumPulse);
 
             servoMotor.Start();  // Enable control signal.
 
@@ -120,11 +124,11 @@ namespace BlazorIron.Server.Controllers
 
             ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
-                MINIMUM_PULSE,
-                MAXIMUM_PULSE);
+                ironSettings.MinimumPulse,
+                ironSettings.MaximumPulse);
             ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                MINIMUM_PULSE,
-                2000);
+                ironSettings.MinimumPulse,
+                ironSettings.MaximumPulse);
 
             servoMotor.Start();  // Enable control signal.
 
@@ -210,14 +214,14 @@ namespace BlazorIron.Server.Controllers
         {
 
 
-            MoveTo(servoMotor, ANGLE_CLOSE_MOTOR1, CurrentAngleMotor1, servoMotor2, ANGLE_CLOSE_MOTOR2, CurrentAngleMotor2);
+            MoveTo(servoMotor, ironSettings.AngleCloseMotor1, CurrentAngleMotor1, servoMotor2, ironSettings.AngleCloseMotor2, CurrentAngleMotor2);
 
         }
 
         private void OpenFace(ServoMotor servoMotor, ServoMotor servoMotor2)
         {
 
-            MoveTo(servoMotor, ANGLE_OPEN_MOTOR1, CurrentAngleMotor1, servoMotor2, ANGLE_OPEN_MOTOR2, CurrentAngleMotor2);
+            MoveTo(servoMotor, ironSettings.AngleOpenMotor1, CurrentAngleMotor1, servoMotor2, ironSettings.AngleOpenMotor2, CurrentAngleMotor2);
 
         }
 
@@ -238,11 +242,11 @@ namespace BlazorIron.Server.Controllers
             {
                 if (currentAngle < angle)
                 {
-                    currentAngle += MOTOR_SPEED;
+                    currentAngle += ironSettings.MotorSpeed;
                 }
                 if (currentAngle > angle)
                 {
-                    currentAngle -= MOTOR_SPEED;
+                    currentAngle -= ironSettings.MotorSpeed;
                 }
 
                 s.WriteAngle(currentAngle);
@@ -250,11 +254,11 @@ namespace BlazorIron.Server.Controllers
 
                 if (currentAngle1 < angle1)
                 {
-                    currentAngle1 += MOTOR_SPEED;
+                    currentAngle1 += ironSettings.MotorSpeed;
                 }
                 if (currentAngle1 > angle1)
                 {
-                    currentAngle1 -= MOTOR_SPEED;
+                    currentAngle1 -= ironSettings.MotorSpeed;
                 }
 
                 s.WriteAngle(currentAngle);
