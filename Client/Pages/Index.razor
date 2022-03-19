@@ -23,8 +23,23 @@ Welcome to your new app.
     <button class="btn btn-primary" @onclick="EyesOff">Eyes off</button>
 </p>
 
+<p>
+    <button class="btn btn-primary" @onclick="StartVoice">Start voice recognition</button>&nbsp;&nbsp;
+    <button class="btn btn-primary" @onclick="StopVoice">Stop voice recognition</button>
+</p>
+
 @code {
 
+
+    private void StartVoice()
+    {
+        Http.GetAsync("IronMan/startvoice");
+    }
+
+    private void StopVoice()
+    {
+        Http.GetAsync("IronMan/stopvoice");
+    }
 
     private void OpenFace()
     {

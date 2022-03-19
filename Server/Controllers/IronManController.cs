@@ -8,6 +8,7 @@ using Iot.Device.Graphics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Device.Gpio;
+using System.Diagnostics;
 
 namespace BlazorIron.Server.Controllers
 {
@@ -52,6 +53,22 @@ namespace BlazorIron.Server.Controllers
         [HttpGet]
         public void Get()
         {
+        }
+
+        [HttpGet("[action]")]
+        public void StartVoice()
+        {
+
+            ExecuteCommand("/home/pi/Public/ironserver/IronServer");
+
+        }
+
+        [HttpGet("[action]")]
+        public void StopVoice()
+        {
+
+            ExecuteCommand("systemctl --user stop ironserver");
+
         }
 
         [HttpGet("[action]")]
@@ -208,6 +225,31 @@ namespace BlazorIron.Server.Controllers
 
             servoMotor.Stop();
             servoMotor2.Stop();
+        }
+
+        private void ExecuteCommand(string command)
+        {
+
+            string result = "";
+
+            //Process.Start(command);
+
+            using (System.Diagnostics.Process proc = new System.Diagnostics.Process())
+            {
+                proc.StartInfo.FileName = "/bin/bash";
+                proc.StartInfo.Arguments = "-c \" " + command + " \"";
+                proc.StartInfo.UseShellExecute = false;
+                proc.StartInfo.RedirectStandardOutput = true;
+                proc.StartInfo.RedirectStandardError = true;
+                proc.StartInfo.CreateNoWindow = true;
+                proc.Start();
+
+                result += proc.StandardOutput.ReadToEnd();
+                result += proc.StandardError.ReadToEnd();
+
+                proc.WaitForExit();
+            }
+
         }
 
         private void CloseFace(ServoMotor servoMotor, ServoMotor servoMotor2)
