@@ -11,5 +11,6 @@ namespace BlazorIron.Shared
         public int MaximumPulse { get; set; }
         public int MotorSpeed { get; set; }
         public int EyeSwitchLed { get; set; }
+        public int MotorSleep { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace IronServer
 {
     internal class IronServer
     {
-        private const string SpeechSubscriptionKey = "XX";
+        private const string SpeechSubscriptionKey = "X";
         private const string SpeechRegion = "westeurope";
         private const string Culture = "it-IT";
         SpeechRecognizer cognitiveRecognizer;
@@ -46,7 +46,7 @@ namespace IronServer
                 var result = await cognitiveRecognizer.RecognizeOnceAsync();
 
                 // Checks result.
-                string line;
+                string line="";
                 switch (result.Reason)
                 {
                     case ResultReason.RecognizedSpeech:

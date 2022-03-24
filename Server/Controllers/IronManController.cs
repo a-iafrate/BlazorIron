@@ -17,10 +17,14 @@ namespace BlazorIron.Server.Controllers
     public class IronManController : ControllerBase
     {
 
-
-
-        private int CurrentAngleMotor1 = 0;
-        private int CurrentAngleMotor2 = 0;
+#if DEBUG
+        private const bool SIMULATE = true;
+#else
+    private const bool SIMULATE = false;
+#endif
+        private static bool _loaded = false;
+        private static int CurrentAngleMotor1 = 0;
+        private static int CurrentAngleMotor2 = 0;
 
 
 
@@ -46,8 +50,12 @@ namespace BlazorIron.Server.Controllers
             Configuration = configuration;
             Configuration.GetSection(IronSettings.Position).Bind(ironSettings);
 
-            CurrentAngleMotor1 = ironSettings.AngleCloseMotor1;
-            CurrentAngleMotor2 = ironSettings.AngleOpenMotor2;
+            if (!_loaded)
+            {
+                CurrentAngleMotor1 = ironSettings.AngleCloseMotor1;
+                CurrentAngleMotor2 = ironSettings.AngleCloseMotor2;
+                _loaded= true;
+            }
         }
 
         [HttpGet]
@@ -106,6 +114,14 @@ namespace BlazorIron.Server.Controllers
         }
 
         [HttpGet("[action]")]
+        public IronSettings Config()
+        {
+
+            return ironSettings;
+
+        }
+
+        [HttpGet("[action]")]
         public void PowerOff()
         {
 
@@ -116,43 +132,54 @@ namespace BlazorIron.Server.Controllers
         [HttpGet("[action]")]
         public void OpenFace()
         {
+            if (!SIMULATE)
+            {
+                ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
+                    180,
+                    ironSettings.MinimumPulse,
+                    ironSettings.MaximumPulse);
+                ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
+                    ironSettings.MinimumPulse,
+                    ironSettings.MaximumPulse);
 
-            ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
-                180,
-                ironSettings.MinimumPulse,
-                ironSettings.MaximumPulse);
-            ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                ironSettings.MinimumPulse,
-                ironSettings.MaximumPulse);
+                servoMotor.Start();  // Enable control signal.
 
-            servoMotor.Start();  // Enable control signal.
-
-            servoMotor2.Start();  // Enable control signal.
+                servoMotor2.Start();  // Enable control signal.
 
 
-            OpenFace(servoMotor, servoMotor2);
-
+                OpenFace(servoMotor, servoMotor2);
+            }
+            else
+            {
+                OpenFace(null, null);
+            }
 
         }
 
         [HttpGet("[action]")]
         public void CloseFace()
         {
+            if (!SIMULATE)
+            {
 
-            ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
+                ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
                 180,
                 ironSettings.MinimumPulse,
                 ironSettings.MaximumPulse);
-            ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                ironSettings.MinimumPulse,
-                ironSettings.MaximumPulse);
+                ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
+                    ironSettings.MinimumPulse,
+                    ironSettings.MaximumPulse);
 
-            servoMotor.Start();  // Enable control signal.
+                servoMotor.Start();  // Enable control signal.
 
-            servoMotor2.Start();  // Enable control signal.
+                servoMotor2.Start();  // Enable control signal.
 
-            CloseFace(servoMotor, servoMotor2);
-
+                CloseFace(servoMotor, servoMotor2);
+            }
+            else
+            {
+                CloseFace(null, null);
+            }
         }
 
         [HttpGet("[action]")]
@@ -272,14 +299,13 @@ namespace BlazorIron.Server.Controllers
 
             MoveTo(servoMotor2, angle2, CurrentAngleMotor2, servoMotor, angle, CurrentAngleMotor1);
 
-            CurrentAngleMotor1 = angle;
-            CurrentAngleMotor2 = angle2;
+            //CurrentAngleMotor1 = angle;
+            //CurrentAngleMotor2 = angle2;
         }
 
         private void MoveTo(ServoMotor s, int angle, int currentAngle, ServoMotor s1, int angle1, int currentAngle1)
         {
-            int pos = currentAngle;
-            int pos1 = currentAngle;
+           
             while (currentAngle != angle || currentAngle1 != angle1)
             {
                 if (currentAngle < angle)
@@ -291,9 +317,7 @@ namespace BlazorIron.Server.Controllers
                     currentAngle -= ironSettings.MotorSpeed;
                 }
 
-                s.WriteAngle(currentAngle);
-
-
+                
                 if (currentAngle1 < angle1)
                 {
                     currentAngle1 += ironSettings.MotorSpeed;
@@ -303,12 +327,14 @@ namespace BlazorIron.Server.Controllers
                     currentAngle1 -= ironSettings.MotorSpeed;
                 }
 
-                s.WriteAngle(currentAngle);
-                s1.WriteAngle(currentAngle1);
-                Thread.Sleep(10);
-                Console.WriteLine("Current: " + currentAngle + " - Angle: " + angle);
-                Console.WriteLine("Current1: " + currentAngle1 + " - Angle1: " + angle1);
-
+                if (!SIMULATE)
+                {
+                    s.WriteAngle(currentAngle);
+                    s1.WriteAngle(currentAngle1);
+                }
+                Thread.Sleep(25);
+                Debug.WriteLine("Current: " + currentAngle + " - Current1: " + currentAngle1);
+                
             }
 
             CurrentAngleMotor1 = angle;
