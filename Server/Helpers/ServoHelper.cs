@@ -59,8 +59,7 @@ namespace BlazorIron.Server.Helpers
 
                 OpenFace(servoMotor, servoMotor2);
 
-                servoMotor.Stop();
-                servoMotor2.Stop();
+
                 _isWorking=false;
             }
             else
@@ -156,7 +155,7 @@ namespace BlazorIron.Server.Helpers
                     s.WriteAngle(currentAngle);
                     s1.WriteAngle(currentAngle1);
                 }
-                Thread.Sleep(25);
+                Thread.Sleep(_settings.MotorSleep);
                 Debug.WriteLine("Current: " + currentAngle + " - Current1: " + currentAngle1);
 
             }
