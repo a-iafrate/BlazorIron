@@ -3,30 +3,26 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, i'm Jarvis v 0.2 beta</h1>
+<h1 style="text-align:center">Hello, i'm Jarvis v 0.2 beta</h1>
+<table style="width:100%;margin-top: 50px;">
+    <tr>
+        <td style="text-align:right">
+            <button class="btn btn-primary" @onclick="OpenFace">Open face</button><br/><br/>
+             <button class="btn btn-primary" @onclick="EyesOn">Eyes on</button><br/><br/>
+             <button class="btn btn-primary" @onclick="LedOn">Led on</button>
+        </td>
+        <td  style="text-align: center;width:33%">
+            <img src="images\helmet.png"/>
+        </td>
+        <td>
+            <button class="btn btn-primary" @onclick="CloseFace">Close face</button><br/><br/>
+            <button class="btn btn-primary" @onclick="EyesOff">Eyes off</button><br/><br/>
+             <button class="btn btn-primary" @onclick="LedOff">Led off</button>
+        </td>
+    </tr>
+    
+</table>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
-<p>
-    <button class="btn btn-primary" @onclick="OpenFace">Open face</button>&nbsp;&nbsp;
-    <button class="btn btn-primary" @onclick="CloseFace">Close face</button>
-</p>
-
-<p>
-    <button class="btn btn-primary" @onclick="LedOn">Led on</button>&nbsp;&nbsp;
-    <button class="btn btn-primary" @onclick="LedOff">Led off</button>
-</p>
-
-<p>
-    <button class="btn btn-primary" @onclick="EyesOn">Eyes on</button>&nbsp;&nbsp;
-    <button class="btn btn-primary" @onclick="EyesOff">Eyes off</button>
-</p>
-
-<p>
-    <button class="btn btn-primary" @onclick="StartVoice">Start voice recognition</button>&nbsp;&nbsp;
-    <button class="btn btn-primary" @onclick="StopVoice">Stop voice recognition</button>
-</p>
 
 @code {
 
