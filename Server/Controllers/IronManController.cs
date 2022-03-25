@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Device.Gpio;
 using System.Diagnostics;
+using BlazorIron.Server.Helpers;
 
 namespace BlazorIron.Server.Controllers
 {
@@ -17,14 +18,7 @@ namespace BlazorIron.Server.Controllers
     public class IronManController : ControllerBase
     {
 
-#if DEBUG
-        private const bool SIMULATE = true;
-#else
-    private const bool SIMULATE = false;
-#endif
-        private static bool _loaded = false;
-        private static int CurrentAngleMotor1 = 0;
-        private static int CurrentAngleMotor2 = 0;
+
 
 
 
@@ -42,6 +36,7 @@ namespace BlazorIron.Server.Controllers
 
         private readonly ILogger<IronManController> _logger;
         private readonly IConfiguration Configuration;
+        private ServoHelper servoHelper;
 
         public IronManController(ILogger<IronManController> logger, IConfiguration configuration)
         {
@@ -49,13 +44,8 @@ namespace BlazorIron.Server.Controllers
 
             Configuration = configuration;
             Configuration.GetSection(IronSettings.Position).Bind(ironSettings);
-
-            if (!_loaded)
-            {
-                CurrentAngleMotor1 = ironSettings.AngleCloseMotor1;
-                CurrentAngleMotor2 = ironSettings.AngleCloseMotor2;
-                _loaded= true;
-            }
+            servoHelper=ServoHelper.Current(ironSettings);
+            
         }
 
         [HttpGet]
@@ -132,60 +122,20 @@ namespace BlazorIron.Server.Controllers
         [HttpGet("[action]")]
         public void OpenFace()
         {
-            if (!SIMULATE)
-            {
-                ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
-                    180,
-                    ironSettings.MinimumPulse,
-                    ironSettings.MaximumPulse);
-                ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                    ironSettings.MinimumPulse,
-                    ironSettings.MaximumPulse);
-
-                servoMotor.Start();  // Enable control signal.
-
-                servoMotor2.Start();  // Enable control signal.
-
-
-                OpenFace(servoMotor, servoMotor2);
-            }
-            else
-            {
-                OpenFace(null, null);
-            }
+            servoHelper.OpenFace();
 
         }
 
         [HttpGet("[action]")]
         public void CloseFace()
         {
-            if (!SIMULATE)
-            {
-
-                ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
-                180,
-                ironSettings.MinimumPulse,
-                ironSettings.MaximumPulse);
-                ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                    ironSettings.MinimumPulse,
-                    ironSettings.MaximumPulse);
-
-                servoMotor.Start();  // Enable control signal.
-
-                servoMotor2.Start();  // Enable control signal.
-
-                CloseFace(servoMotor, servoMotor2);
-            }
-            else
-            {
-                CloseFace(null, null);
-            }
+            servoHelper.CloseFace();
         }
 
         [HttpGet("[action]")]
         public void LedOn()
         {
-
+            Color c = Color.FromName(ironSettings.HelmetLedColor);
             var count = 14; // number of LEDs
             var settings = new SpiConnectionSettings(0, 0)
             {
@@ -197,13 +147,13 @@ namespace BlazorIron.Server.Controllers
             using SpiDevice spi = SpiDevice.Create(settings);
 
             var device = new Ws2812b(spi, count);
-
+            
             BitmapImage image = device.Image;
             image.Clear();
-            image.SetPixel(0, 0, Color.Orange);
+            image.SetPixel(ironSettings.HelmetLed1Pos, 0,c);
 
-            image.SetPixel(1, 0, Color.White);
-            image.SetPixel(2, 0, Color.Blue);
+            image.SetPixel(ironSettings.HelmetLed2Pos, 0, c);
+            
             device.Update();
 
         }
@@ -234,24 +184,7 @@ namespace BlazorIron.Server.Controllers
         public void MoveServo(ServoInfo input)
         {
 
-            ServoMotor servoMotor = new ServoMotor(PwmChannel.Create(0, 1, 50),
-                180,
-                input.MinPulse,
-                input.MaxPulse);
-            ServoMotor servoMotor2 = new ServoMotor(PwmChannel.Create(0, 0, 50), 180,
-                input.MinPulse,
-                input.MaxPulse);
-
-            servoMotor.Start();  // Enable control signal.
-
-            servoMotor2.Start();  // Enable control signal.
-
-
-            MoveTo(servoMotor, input.Angle1, servoMotor2, input.Angle2);
-
-
-            servoMotor.Stop();
-            servoMotor2.Stop();
+            servoHelper.MoveTo(input);
         }
 
         private void ExecuteCommand(string command)
@@ -279,66 +212,6 @@ namespace BlazorIron.Server.Controllers
 
         }
 
-        private void CloseFace(ServoMotor servoMotor, ServoMotor servoMotor2)
-        {
-
-
-            MoveTo(servoMotor, ironSettings.AngleCloseMotor1, CurrentAngleMotor1, servoMotor2, ironSettings.AngleCloseMotor2, CurrentAngleMotor2);
-
-        }
-
-        private void OpenFace(ServoMotor servoMotor, ServoMotor servoMotor2)
-        {
-
-            MoveTo(servoMotor, ironSettings.AngleOpenMotor1, CurrentAngleMotor1, servoMotor2, ironSettings.AngleOpenMotor2, CurrentAngleMotor2);
-
-        }
-
-        private void MoveTo(ServoMotor servoMotor, int angle, ServoMotor servoMotor2, int angle2)
-        {
-
-            MoveTo(servoMotor2, angle2, CurrentAngleMotor2, servoMotor, angle, CurrentAngleMotor1);
-
-            //CurrentAngleMotor1 = angle;
-            //CurrentAngleMotor2 = angle2;
-        }
-
-        private void MoveTo(ServoMotor s, int angle, int currentAngle, ServoMotor s1, int angle1, int currentAngle1)
-        {
-           
-            while (currentAngle != angle || currentAngle1 != angle1)
-            {
-                if (currentAngle < angle)
-                {
-                    currentAngle += ironSettings.MotorSpeed;
-                }
-                if (currentAngle > angle)
-                {
-                    currentAngle -= ironSettings.MotorSpeed;
-                }
-
-                
-                if (currentAngle1 < angle1)
-                {
-                    currentAngle1 += ironSettings.MotorSpeed;
-                }
-                if (currentAngle1 > angle1)
-                {
-                    currentAngle1 -= ironSettings.MotorSpeed;
-                }
-
-                if (!SIMULATE)
-                {
-                    s.WriteAngle(currentAngle);
-                    s1.WriteAngle(currentAngle1);
-                }
-                Thread.Sleep(25);
-                Debug.WriteLine("Current: " + currentAngle + " - Current1: " + currentAngle1);
-                
-            }
-
-            CurrentAngleMotor1 = angle;
-            CurrentAngleMotor2 = angle1;
-        }
+        
     }
 }

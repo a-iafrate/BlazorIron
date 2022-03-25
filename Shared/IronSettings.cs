@@ -12,5 +12,8 @@ namespace BlazorIron.Shared
         public int MotorSpeed { get; set; }
         public int EyeSwitchLed { get; set; }
         public int MotorSleep { get; set; }
+        public int HelmetLed1Pos { get; set; }
+        public int HelmetLed2Pos { get; set; }
+        public string HelmetLedColor { get; set; }
     }
 }
